@@ -1,0 +1,54 @@
+body{
+    background-color : #202020;
+    overflow: hidden;
+    margin: 0;
+}
+
+.terminal {
+    background-color : #282828;
+    color : #00ff00;
+    font-family : 'Courier New', Courier, monospace;
+    padding : 1em;
+    border-radius : 0.5em;
+    width: 80vw;
+    height: 80vh;
+    border : 2px #111111 solid;
+    position : absolute;
+    left: 10vw;
+    top: 10vh;
+}
+
+.terminal-title {
+    font-size: 1em;
+    font-weight: bold;
+    margin-bottom: 0.5em;
+    border-bottom: 1px solid #00ff00;
+    padding-bottom: 0.1em;
+}
+
+.terminal-input {
+    color: #00ff00;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1em;
+    background-color: #282828;
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    border: none;
+}
+
+#terminal-input {
+    outline: none;
+    caret-color: #00ff00;
+    color: #00ff00;
+    background-color: transparent;
+    width: calc(80vw - 2em);
+}
+
+.terminal-body {
+    height: 400px;
+    padding: 15px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
