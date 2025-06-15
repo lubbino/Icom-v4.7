@@ -1,100 +1,162 @@
-const terminalOutput = document.getElementById('terminal-output');
-const terminalInput = document.getElementById('terminal-input');
+const terminalOutput = document.getElementById("terminal-output");
+const terminalInput = document.getElementById("terminal-input");
 
-const startingMessacges = [
-    "...",
-    "Initializing Icom v4.7",
-    "Type 'help' for a list of commands.",
-
-];
-
-const commandDict = {
-    help: "Available commands:\n" +
-        "help - Show this help message\n" +
-        "clear - Clear the terminal output\n" +
-        "reboot - Restart the Icom system\n" +
-        "version - Show the current version of Icom\n" +
-        "status - Show the current system status\n" +
-        "read log.txt - Read the log file\n",
-    clear: "", // Will be handled specially to clear the terminal
-    reboot: [
-        "Restarting Icom V4.7...",
-        "Rest̵̟͙͂͌a̵̟͒ŕ̴̛̲͜t̸̻̑ ̴̖̯̋f̶̻͛̄a̵̖͋̍i̸̲̳̚l̴̢͍͑ḛ̴̽̚d̵̰̾͗.",
-        "I͏ ͢s͠a͝id ͘do͢n't ͝d̛o͟ t̸h͢a̸ţ."
-    ],
-    version: "Icom v4.7",
-    status: "S̶y̵s̶t̷e̸m̴ ̷o̶p̴e̵r̷a̴t̸i̴o̶n̶a̸l̴... Er̸r͘o̶r͠: ̸E̷y̵e̴s̴ w̷a̸t̸c̴h̶i̸n̴g̷.",
-    hidden: "Access denied",
-    "read log.txt": "Log Entry 7: \nThey told me not to wake it... \nBut I had to know.\n\nLog Entry 8: \nIt's screams are haunting me.\nI can't sleep.\n\nLog Entry 9: \nI think it's watching me.\nI can feel its eyes on me.\n\nLog Entry 10: \nI must find a way to stop it.\nIt must not awaken. \n\nLog Entry 11: \nI have to warn others. \nBut who will believe me?\n\nLog Entry 12: \nI can hear it whispering.\nIt knows my name.\nIf I don't make it out alive...",
+let gameState = {
+  unlockedLogs: false,
+  triggeredReboot: false,
+  heardWhisper: false
 };
-const commands = Object.keys(commandDict).map(key => `${key} - ${commandDict[key]}`);
 
-// display messages one letter at a time in the terminal output
-async function displayMessages(messages, extraClass = '') {
-    // Convert to array if it's a string
-    if (typeof messages === 'string') {
-        messages = [messages];
+let commandHistory = [];
+let historyIndex = -1;
+
+const commands = {
+  help: {
+    description: "List available commands",
+    action: () => {
+      const output = Object.keys(commands).map(cmd => `> ${cmd}`);
+      displayMessages(output);
     }
-
-    terminalInput.disabled = true; // Disable input while typing
-    for (let i = 0; i < messages.length; i++) {
-        const message = messages[i];
-        const output = document.createElement('div');
-        if(extraClass) output.classList.add(extraClass);
-        terminalOutput.appendChild(output);
-        for (let j = 0; j < message.length; j++) {
-            output.textContent += message[j];
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
-            await new Promise(resolve => setTimeout(resolve, 30));
+  },
+  clear: {
+    description: "Clear the screen",
+    action: () => terminalOutput.innerHTML = ''
+  },
+  status: {
+    description: "Check system status",
+    action: () => {
+      displayMessages([
+        "Checking system integrity...",
+        "S̶y̷s̸t̵e̸m̴ a̵n̷o̸m̶a̵l̸y̵ d̶e̴t̸e̵c̷t̸e̴d̴.",
+        "W̴͎͚̐ë̵̘̦́ ̴̠̳̿ș̸̯̔e̸̟̓e̶̹̎ ̸͚̗̀y̵̻͘ȏ̴̻u̷͎̓."
+      ], "glitch");
+      maybeGlitch();
+    }
+  },
+  reboot: {
+    description: "Attempt system reboot",
+    action: () => {
+      displayMessages([
+        "Restarting Icom V4.7...",
+        "Bios check: █▒▒▒▒▒▒▒▒▒▒",
+        "Rest̴̡̳́a̵̲͕͗͋r̶̢̐ẗ̷͕́ ̸̢͆f̶̢͂ą̶̕i̸͍̊l̸͍͑ḛ̵͌d̵̝͐.",
+        "I told you not to do that."
+      ], "glitch");
+      gameState.triggeredReboot = true;
+      maybeGlitch(true);
+    }
+  },
+  "read log": {
+    description: "Access encrypted log",
+    action: () => {
+      if (!gameState.unlockedLogs) {
+        displayMessages("ACCESS DENIED.");
+      } else {
+        displayMessages([
+          "Log Entry #042:",
+          "They are not *in* the system.",
+          "They *are* the system."
+        ]);
+      }
+    }
+  },
+  "unlock logs": {
+    description: "Bypass security",
+    action: () => {
+      ask("Bypass logs security? (yes/no)", ["yes", "no"], (choice) => {
+        if (choice === "yes") {
+          gameState.unlockedLogs = true;
+          displayMessages("Logs unlocked.");
+        } else {
+          displayMessages("Abort.");
         }
-        await new Promise(resolve => setTimeout(resolve, 500));
+      });
     }
-    terminalInput.disabled = false;
-    terminalInput.focus();
+  },
+  "strange.exe": {
+    description: "Run strange program",
+    action: () => {
+      ask("It wants to speak. Allow it? (yes/no)", ["yes", "no"], (choice) => {
+        if (choice === "yes") {
+          gameState.heardWhisper = true;
+          displayMessages([
+            "You hear whispering in the wires...",
+            "It knows your name."
+          ], "glitch");
+          maybeGlitch(true);
+        } else {
+          displayMessages("The silence hums louder.");
+        }
+      });
+    }
+  }
+};
+
+function displayMessages(messages, effect = "") {
+  if (typeof messages === "string") messages = [messages];
+  messages.forEach((msg) => {
+    const line = document.createElement("div");
+    line.textContent = msg;
+    if (effect === "glitch") line.classList.add("glitch-text");
+    terminalOutput.appendChild(line);
+  });
+  terminalOutput.scrollTop = terminalOutput.scrollHeight;
 }
 
+function maybeGlitch(force = false) {
+  if (force || Math.random() < 0.2) {
+    document.body.classList.add("glitch");
+    setTimeout(() => document.body.classList.remove("glitch"), 1000);
+  }
+}
 
+function ask(prompt, options, callback) {
+  displayMessages(prompt);
+  terminalInput.disabled = false;
+  terminalInput.focus();
 
-// Display the starting messages
-displayMessages(startingMessacges);
+  const listener = function (e) {
+    if (e.key === "Enter") {
+      const input = terminalInput.value.trim().toLowerCase();
+      terminalInput.value = "";
+      terminalInput.removeEventListener("keydown", listener);
 
-terminalInput.addEventListener('keydown', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        const command = terminalInput.value.trim();
-        if (command) {
-            const output = document.createElement('div');
-            output.textContent = `$ ${command}`;
-            terminalOutput.appendChild(output);
-            terminalInput.value = '';
-
-            setTimeout(() => {
-                if (commandDict.hasOwnProperty(command)) {
-                    if (command === 'clear') {
-                        terminalOutput.innerHTML = '';
-                        return;
-                    }
-
-                    // Special case: reboot disables input
-                    if (command === 'reboot') {
-                        displayMessages(commandDict[command], "glitch");
-                        terminalInput.disabled = true;
-                        return;
-                    }
-
-                    if (command === "status") {
-                        displayMessages(commandDict[command], "glitch");
-                        return;
-                    }
-                    
-
-                    displayMessages(commandDict[command]);
-                } else {
-                    displayMessages(`Unknown command: ${command}`);
-                }
-
-                terminalOutput.scrollTop = terminalOutput.scrollHeight;
-            }, 500);
-        }
+      if (options.includes(input)) {
+        callback(input);
+      } else {
+        displayMessages("Invalid choice.");
+        ask(prompt, options, callback);
+      }
     }
+  };
+
+  terminalInput.addEventListener("keydown", listener);
+}
+
+terminalInput.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    const input = terminalInput.value.trim().toLowerCase();
+    terminalInput.value = "";
+    commandHistory.push(input);
+    historyIndex = commandHistory.length;
+
+    const command = commands[input];
+    if (command) {
+      command.action();
+    } else {
+      displayMessages(`Unknown command: ${input}`);
+    }
+  } else if (e.key === "ArrowUp") {
+    if (historyIndex > 0) {
+      historyIndex--;
+      terminalInput.value = commandHistory[historyIndex];
+    }
+  } else if (e.key === "ArrowDown") {
+    if (historyIndex < commandHistory.length - 1) {
+      historyIndex++;
+      terminalInput.value = commandHistory[historyIndex];
+    } else {
+      terminalInput.value = "";
+    }
+  }
 });
