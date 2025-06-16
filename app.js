@@ -1,162 +1,157 @@
-const terminalOutput = document.getElementById("terminal-output");
-const terminalInput = document.getElementById("terminal-input");
+import { handleCommand } from './commands.js';
 
-let gameState = {
-  unlockedLogs: false,
-  triggeredReboot: false,
-  heardWhisper: false
-};
+const terminalOutput = document.getElementById('terminal-output');
+const terminalInput = document.getElementById('terminal-input');
+const typeSound = document.getElementById('typeSound');
+const breathing = document.getElementById('breathing');
 
-let commandHistory = [];
-let historyIndex = -1;
+// Boot ASCII animation lines
+const bootLines = [
+  "Initializing terminal...",
+  "Boot sequence started...",
+  "[ OK ] Memory test passed",
+  "[ OK ] Audio device detected",
+  "[ OK ] Glitch filter engaged",
+  "[ OK ] CRT overlay loaded",
+  "Welcome to Icom v4.7",
+  ""
+];
 
-const commands = {
-  help: {
-    description: "List available commands",
-    action: () => {
-      const output = Object.keys(commands).map(cmd => `> ${cmd}`);
-      displayMessages(output);
-    }
-  },
-  clear: {
-    description: "Clear the screen",
-    action: () => terminalOutput.innerHTML = ''
-  },
-  status: {
-    description: "Check system status",
-    action: () => {
-      displayMessages([
-        "Checking system integrity...",
-        "S̶y̷s̸t̵e̸m̴ a̵n̷o̸m̶a̵l̸y̵ d̶e̴t̸e̵c̷t̸e̴d̴.",
-        "W̴͎͚̐ë̵̘̦́ ̴̠̳̿ș̸̯̔e̸̟̓e̶̹̎ ̸͚̗̀y̵̻͘ȏ̴̻u̷͎̓."
-      ], "glitch");
-      maybeGlitch();
-    }
-  },
-  reboot: {
-    description: "Attempt system reboot",
-    action: () => {
-      displayMessages([
-        "Restarting Icom V4.7...",
-        "Bios check: █▒▒▒▒▒▒▒▒▒▒",
-        "Rest̴̡̳́a̵̲͕͗͋r̶̢̐ẗ̷͕́ ̸̢͆f̶̢͂ą̶̕i̸͍̊l̸͍͑ḛ̵͌d̵̝͐.",
-        "I told you not to do that."
-      ], "glitch");
-      gameState.triggeredReboot = true;
-      maybeGlitch(true);
-    }
-  },
-  "read log": {
-    description: "Access encrypted log",
-    action: () => {
-      if (!gameState.unlockedLogs) {
-        displayMessages("ACCESS DENIED.");
+let lineIndex = 0;
+let randomEventTimeout;
+
+// Play boot lines one by one, only printing next after current finishes
+async function playBootLines() {
+  if (lineIndex < bootLines.length) {
+    await printLine(bootLines[lineIndex]);
+    lineIndex++;
+    setTimeout(playBootLines, 300);
+  } else {
+    terminalInput.disabled = false;
+    terminalInput.focus();
+    startRandomEvents();
+  }
+}
+
+// Print line with typing effect and return a promise that resolves when done
+function printLine(text, speed = 30) {
+  return new Promise(resolve => {
+    const div = document.createElement('div');
+    terminalOutput.appendChild(div);
+    let i = 0;
+
+    function typeChar() {
+      if (i < text.length) {
+        div.textContent += text.charAt(i);
+        if (typeSound) {
+          typeSound.currentTime = 0;
+          typeSound.play();
+        }
+        // Horrify the user with a glitch effect
+        if (Math.random() < 0.05) { // 5% chance to glitch
+          div.classList.add('glitch');
+          setTimeout(() => div.classList.remove('glitch'), 100);
+        }
+        // Add CRT flicker effect
+        if (Math.random() < 0.1) { // 10% chance to flicker
+          terminalOutput.classList.add('flicker');
+          setTimeout(() => terminalOutput.classList.remove('flicker'), 100);
+        }
+        i++;
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+        setTimeout(typeChar, speed);
       } else {
-        displayMessages([
-          "Log Entry #042:",
-          "They are not *in* the system.",
-          "They *are* the system."
-        ]);
+        resolve();
       }
     }
-  },
-  "unlock logs": {
-    description: "Bypass security",
-    action: () => {
-      ask("Bypass logs security? (yes/no)", ["yes", "no"], (choice) => {
-        if (choice === "yes") {
-          gameState.unlockedLogs = true;
-          displayMessages("Logs unlocked.");
-        } else {
-          displayMessages("Abort.");
-        }
-      });
-    }
-  },
-  "strange.exe": {
-    description: "Run strange program",
-    action: () => {
-      ask("It wants to speak. Allow it? (yes/no)", ["yes", "no"], (choice) => {
-        if (choice === "yes") {
-          gameState.heardWhisper = true;
-          displayMessages([
-            "You hear whispering in the wires...",
-            "It knows your name."
-          ], "glitch");
-          maybeGlitch(true);
-        } else {
-          displayMessages("The silence hums louder.");
-        }
-      });
-    }
-  }
-};
 
-function displayMessages(messages, effect = "") {
-  if (typeof messages === "string") messages = [messages];
-  messages.forEach((msg) => {
-    const line = document.createElement("div");
-    line.textContent = msg;
-    if (effect === "glitch") line.classList.add("glitch-text");
-    terminalOutput.appendChild(line);
+    typeChar();
   });
-  terminalOutput.scrollTop = terminalOutput.scrollHeight;
 }
 
-function maybeGlitch(force = false) {
-  if (force || Math.random() < 0.2) {
-    document.body.classList.add("glitch");
-    setTimeout(() => document.body.classList.remove("glitch"), 1000);
+// Disable input during boot
+terminalInput.disabled = true;
+
+// Play typing sound on input events
+terminalInput.addEventListener('input', () => {
+  if (typeSound) {
+    typeSound.currentTime = 0;
+    typeSound.play();
   }
-}
+});
 
-function ask(prompt, options, callback) {
-  displayMessages(prompt);
-  terminalInput.disabled = false;
-  terminalInput.focus();
+// Handle Enter key for commands
+terminalInput.addEventListener('keydown', async e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const input = terminalInput.value.trim();
+    if (input !== '') {
+      terminalInput.disabled = true;
+      await printLine(`\n$ ${input}`);
 
-  const listener = function (e) {
-    if (e.key === "Enter") {
-      const input = terminalInput.value.trim().toLowerCase();
-      terminalInput.value = "";
-      terminalInput.removeEventListener("keydown", listener);
-
-      if (options.includes(input)) {
-        callback(input);
-      } else {
-        displayMessages("Invalid choice.");
-        ask(prompt, options, callback);
+      const result = await handleCommand(input, printLine, terminalInput, breathing, stopRandomEvents);
+      if (result === 'clear') {
+        terminalOutput.innerHTML = '';
       }
-    }
-  };
 
-  terminalInput.addEventListener("keydown", listener);
-}
-
-terminalInput.addEventListener("keydown", function (e) {
-  if (e.key === "Enter") {
-    const input = terminalInput.value.trim().toLowerCase();
-    terminalInput.value = "";
-    commandHistory.push(input);
-    historyIndex = commandHistory.length;
-
-    const command = commands[input];
-    if (command) {
-      command.action();
-    } else {
-      displayMessages(`Unknown command: ${input}`);
-    }
-  } else if (e.key === "ArrowUp") {
-    if (historyIndex > 0) {
-      historyIndex--;
-      terminalInput.value = commandHistory[historyIndex];
-    }
-  } else if (e.key === "ArrowDown") {
-    if (historyIndex < commandHistory.length - 1) {
-      historyIndex++;
-      terminalInput.value = commandHistory[historyIndex];
-    } else {
-      terminalInput.value = "";
+      terminalInput.value = '';
+      if (!terminalInput.disabled) {
+        terminalInput.disabled = false;
+        terminalInput.focus();
+      }
     }
   }
 });
+
+// --- Random events system ---
+
+function startRandomEvents() {
+  scheduleNextEvent();
+}
+
+function stopRandomEvents() {
+  if (randomEventTimeout) {
+    clearTimeout(randomEventTimeout);
+    randomEventTimeout = null;
+  }
+}
+
+function scheduleNextEvent() {
+  // Schedule a random event between 10 and 25 seconds
+  const delay = 10000 + Math.random() * 15000;
+  randomEventTimeout = setTimeout(triggerRandomEvent, delay);
+}
+
+async function triggerRandomEvent() {
+  const events = [
+    async () => {
+      await printLine("[Warning] Sensor glitch detected...");
+    },
+    async () => {
+      await printLine("[Alert] Unusual audio interference.");
+      if (Math.random() < 0.3) {
+        breathing.currentTime = 0;
+        breathing.play();
+      }
+    },
+    async () => {
+      await printLine("[Notice] Power fluctuation recorded.");
+    },
+    async () => {
+      await printLine("[System] Memory usage spike detected.");
+    },
+    async () => {
+      await printLine("[Error] Data stream corrupted.");
+    }
+  ];
+
+  // Pick a random event and run it
+  const event = events[Math.floor(Math.random() * events.length)];
+  await event();
+
+  // Schedule next event
+  scheduleNextEvent();
+}
+
+// Start the boot sequence on script load
+playBootLines();

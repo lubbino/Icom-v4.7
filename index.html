@@ -1,23 +1,30 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#000000">
-    <link rel="stylesheet" href="stylesheet.css">
-    <title>The Terminal</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#000000" />
+  <link rel="stylesheet" href="stylesheet.css" />
+  <title>The Terminal</title>
 </head>
 <body>
-    <audio autoplay loop src="static_hum.mp3" style="display:none"></audio>
-    <div class="terminal">
-        <div class="terminal-title">Icom v4.7</div>
-        <div class="terminal-body" id="terminal-output">
-            <!-- Messages will be displayed here -->
-        </div>
-        <div class="terminal-input">
-            <span class="prompt">$</span>
-            <input type="text" id="terminal-input"  autofocus>
-        </div>
+  <!-- Sound -->
+  <audio id="hum" autoplay loop src="static_hum.mp3" style="display:none"></audio>
+  <audio id="typeSound" src="key_press.mp3" preload="auto"></audio>
+  <audio id="breathing" src="breathing.mp3" preload="auto"></audio>
+
+  <!-- Terminal -->
+  <div class="terminal">
+    <div class="terminal-title glitch" data-text="Icom v4.7">Icom v4.7</div>
+    <div class="terminal-body" id="terminal-output"></div>
+    <div class="terminal-input">
+      <span class="prompt blinking">$</span>
+      <input type="text" id="terminal-input" autofocus />
     </div>
-    <script src="app.js"></script>
+  </div>
+
+  <!-- Scripts -->
+  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>
