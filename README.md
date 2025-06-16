@@ -10,11 +10,7 @@ Terminal Game is a web-based simulation of a terminal where you can "chat" and i
 
 ## Getting Started
 
-1. Clone the repository:
-    ```bash
-    git clone https://github.com/lubbino/terminal-game.git
-    ```
-2. Open `index.html` in your browser.
+Go to '''www.github.io/lubbino/Icom-v4.7'''
 
 ## Technologies Used
 
