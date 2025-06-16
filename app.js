@@ -11,9 +11,19 @@ const bootLines = [
   "Boot sequence started...",
   "[ OK ] Memory test passed",
   "[ OK ] Audio device detected",
-  "[ OK ] Glitch filter engaged",
-  "[ OK ] CRT overlay loaded",
+  "[ ERROR ] Power fluctuation detected",
+  "[ OK ] Loading system modules...",
+  "[ OK ] Network interface initialized",
+  "[ WARNING ] Sensor calibration required",
+  "[ INFO ] System time synchronized",
+  "[ INFO ] Starting background processes...",
+  "[ INFO ] Loading user configuration...",
+  "[ ALERT ] Unusual activity detected",
+  "[ INFO ] Applying system updates...",
+  "[ INFO ] Security protocols engaged",
+  "[ INFO ] Starting main application...",
   "Welcome to Icom v4.7",
+  "Type 'help' for available commands.",
   ""
 ];
 
@@ -34,7 +44,7 @@ async function playBootLines() {
 }
 
 // Print line with typing effect and return a promise that resolves when done
-function printLine(text, speed = 30) {
+function printLine(text, speed = 50) {
   return new Promise(resolve => {
     const div = document.createElement('div');
     terminalOutput.appendChild(div);
@@ -95,10 +105,8 @@ terminalInput.addEventListener('keydown', async e => {
       }
 
       terminalInput.value = '';
-      if (!terminalInput.disabled) {
         terminalInput.disabled = false;
         terminalInput.focus();
-      }
     }
   }
 });
@@ -118,7 +126,7 @@ function stopRandomEvents() {
 
 function scheduleNextEvent() {
   // Schedule a random event between 10 and 25 seconds
-  const delay = 10000 + Math.random() * 15000;
+  const delay = 20000 + Math.random() * 20000;
   randomEventTimeout = setTimeout(triggerRandomEvent, delay);
 }
 
@@ -148,6 +156,9 @@ async function triggerRandomEvent() {
   // Pick a random event and run it
   const event = events[Math.floor(Math.random() * events.length)];
   await event();
+
+  terminalInput.disabled = false;
+  terminalInput.focus();
 
   // Schedule next event
   scheduleNextEvent();

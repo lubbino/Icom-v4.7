@@ -28,6 +28,10 @@ export async function handleCommand(cmd, printLine, terminalInput, breathing, st
       );
       break;
 
+    case 'reboot':
+      await printLine("Rebooting system...\nPlease wait...\nr̶̠̈ḙ̸͠b̵̞͆õ̷̟ǫ̵͂t̶̛͜ ̶̗̚f̶̳͌ã̷̮ǐ̵̮l̸̤̓e̸̦̔d̸͚͠\nD̷̠̅̐̾ö̸̼̭́̃̒̎ ̴̡̢̹͖̄n̴̩̎̈́̿õ̴̪͈̪̿͛͠t̸̺̭̦̝͂̈́́̕ ̷̡̜̱̿́̈͊ḑ̴͇̪̽̔͘ͅo̵̞̥̱̙̅̔̂͝ ̶̩̓t̵͇̂͜h̴̫̆̆͊̽ͅa̷͓̭͌t̷̶̢̪̠͑̈̓͂̕\na̵͌͆͂͜ĺ̴̟̏͝ḽ̸͐́͊ ̷̧̉̈́̽ ̵̈́͘s̴̭̊̈͂y̸̌́͠s̶̉́̓t̷̊̈́ẻ̴́̃m ̷̊̈́i̸̊̈́n ̶̊̈́ço̧ŗŗȩçţļy̧\n[Warning] Reboot failed. System integrity compromised.\nPlease contact support.\n[System] Reboot aborted.\n[Warning] Unauthorized access detected.\n[Alert] I̸ ̷w̴o̸u̴l̶d̴ ̶n̸o̶t̶ ̷d̴o̶ ̸t̸h̶a̸t̵ ̸i̸f̵ ̴I̸ ̴w̶e̷r̵e̴ ̵y̷o̵u̸");
+      break;
+
     case 'clear':
       // Clear screen handled outside since terminalOutput is outside here
       return 'clear';
@@ -68,7 +72,7 @@ export async function handleCommand(cmd, printLine, terminalInput, breathing, st
         "You hear faint whispers, distorted breathing, and distant footsteps.\n" +
         "Are you alone?"
       );
-      if (Math.random() < 0.1) {
+      if (Math.random() < 0.4) {
         setTimeout(() => {
           breathing.currentTime = 0;
           breathing.play();
