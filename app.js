@@ -44,7 +44,7 @@ async function playBootLines() {
 }
 
 // Print line with typing effect and return a promise that resolves when done
-function printLine(text, speed = 50) {
+function printLine(text, speed = 40) {
   return new Promise(resolve => {
     const div = document.createElement('div');
     terminalOutput.appendChild(div);
@@ -53,7 +53,7 @@ function printLine(text, speed = 50) {
     function typeChar() {
       if (i < text.length) {
         div.textContent += text.charAt(i);
-        if (typeSound) {
+        if (Math.random() < 0.6) { // 60% chance to play typing sound
           typeSound.currentTime = 0;
           typeSound.play();
         }

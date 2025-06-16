@@ -52,7 +52,12 @@ export async function handleCommand(cmd, printLine, terminalInput, breathing, st
         "- 02:15:01 - Sensor anomaly detected\n" +
         "- 02:15:45 - Unidentified audio detected\n" +
         "- 02:16:10 - Power fluctuation\n" +
-        "- 02:16:45 - Error: Data corrupted"
+        "- 02:16:45 - Error: Data corrupted\n" +
+        "- 02:17:30 - Unauthorized access attempt\n" +
+        "- 02:18:13 - System scan initiated\n" +
+        "- 02:18:32 - Listening for sounds\n" +
+        "- 02:18:48 - User command: reboot\n" +
+        "- 02:19:00 - User tried to reboot, unsucessful\n"
       );
       break;
 
@@ -72,7 +77,7 @@ export async function handleCommand(cmd, printLine, terminalInput, breathing, st
         "You hear faint whispers, distorted breathing, and distant footsteps.\n" +
         "Are you alone?"
       );
-      if (Math.random() < 0.4) {
+      if (Math.random() < 0.7) {
         setTimeout(() => {
           breathing.currentTime = 0;
           breathing.play();
