@@ -10,7 +10,7 @@ Terminal Game is a web-based simulation of a terminal where you can "chat" and i
 
 ## Getting Started
 
-Go to '''www.github.io/lubbino/Icom-v4.7'''
+Go to www.github.io/lubbino/Icom-v4.7
 
 ## Technologies Used
 
